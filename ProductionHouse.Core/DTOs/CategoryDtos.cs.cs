@@ -1,10 +1,10 @@
+using ProductionHouse.Core.Enums;
 using System.Collections.Generic;
 
 namespace ProductionHouse.Core.DTOs
 {
     public class AddCategoryDto
     {
-        public string Image { get; set; } = string.Empty;
 
         public List<AddCategoryTranslationDto> Translations { get; set; } = new();
     }
@@ -13,7 +13,7 @@ namespace ProductionHouse.Core.DTOs
     {
         public int Id { get; set; }
 
-        public string Image { get; set; } = string.Empty;
+
 
         public List<AddCategoryTranslationDto> Translations { get; set; } = new();
     }
@@ -22,14 +22,13 @@ namespace ProductionHouse.Core.DTOs
     {
         public int Id { get; set; }
 
-        public string Image { get; set; } = string.Empty;
 
         public List<CategoryTranslationDto> Translations { get; set; } = new();
     }
 
     public class AddCategoryTranslationDto
     {
-        public string LanguageCode { get; set; } = string.Empty;
+        public LanguageCode LanguageCode { get; set; } 
 
         public string Name { get; set; } = string.Empty;
     }

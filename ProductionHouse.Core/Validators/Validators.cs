@@ -10,9 +10,7 @@ namespace ProductionHouse.Core.Validators
     {
         public AddCategoryDtoValidator()
         {
-            RuleFor(x => x.Image)
-                .NotEmpty()
-                .WithMessage("Image is required.");
+       
 
             RuleFor(x => x.Translations)
                 .NotEmpty()
@@ -34,7 +32,6 @@ namespace ProductionHouse.Core.Validators
             RuleFor(x => x.LanguageCode)
                 .NotEmpty()
                 .WithMessage("Language code is required.")
-                .Length(2)
                 .WithMessage("Language code must be 2 characters.");
 
             RuleFor(x => x.Name)
@@ -57,9 +54,7 @@ namespace ProductionHouse.Core.Validators
                 .GreaterThan(0)
                 .WithMessage("Invalid category id.");
 
-            RuleFor(x => x.Image)
-                .NotEmpty()
-                .WithMessage("Image is required.");
+      
 
             RuleFor(x => x.Translations)
                 .NotEmpty()
@@ -111,7 +106,6 @@ namespace ProductionHouse.Core.Validators
             RuleFor(x => x.LanguageCode)
                 .NotEmpty()
                 .WithMessage("Language code is required.")
-                .Length(2)
                 .WithMessage("Language code must be 2 characters.");
 
             RuleFor(x => x.Title)

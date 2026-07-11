@@ -10,16 +10,17 @@ using ProductionHouse.Infrastructure.Data;
 using ProductionHouse.Infrastructure.Repositories;
 using ProductionHouse.Infrastructure.Service;
 using ProductionHouse.Infrastructure.Services;
-using ProductionHouse.Infrastructure.UnitOfWork;
+using ProductionHouse.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using ProductionHouse.Core.Responses;
+using ProductionHouse.Core.Interfaces.ProductionHouse.Core.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================
 // 1. تسجيل الخدمات (Dependency Injection)
 // ==========================================
 
-builder.Services.AddControllers();
+
 
 // إعداد قاعدة البيانات (DbContext) - مرة واحدة فقط
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -31,7 +32,7 @@ builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddControllers()
     .AddFluentValidation(config =>

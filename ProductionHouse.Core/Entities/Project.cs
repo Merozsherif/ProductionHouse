@@ -24,5 +24,12 @@ namespace ProductionHouse.Core.Entities
         public List<ProjectImage> Images { get; set; } = new();
 
         public List<ProjectTranslation> Translations { get; set; } = new();
+
+
+        public bool IsPublished { get; set; } = true;
+
+        public bool IsFeatured { get; set; }
+
+        public int DisplayOrder { get; set; }
     }
 }

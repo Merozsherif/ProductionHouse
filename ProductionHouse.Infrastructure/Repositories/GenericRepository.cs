@@ -17,38 +17,40 @@ namespace ProductionHouse.Infrastructure.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public async Task<List<T>> GetAllAsync()
+        public virtual async Task<List<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public virtual async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task AddAsync(T entity)
+        public virtual async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
  
         }
 
-        public void Update(T entity)
+        public virtual void Update(T entity)
         {
             _dbSet.Update(entity);
 
         }
 
           
-    public void Delete(T entity)
+    public virtual void Delete(T entity)
         {
             _dbSet.Remove(entity);
     
         }
 
-        public Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public virtual async Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(predicate)
+                .ToListAsync();
         }
     }
 }

@@ -5,8 +5,6 @@ using ProductionHouse.Core.Responses;
 
 namespace ProductionHouse.API.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
     public class CategoriesController : BaseController
     {
         private readonly ICategoryService _categoryService;
@@ -17,7 +15,8 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== GET ALL =====================
-        [HttpGet]
+        // URL: /api/Categories/Get-All
+        [HttpGet("Get-All")]
         public async Task<IActionResult> GetAll()
         {
             var categories = await _categoryService.GetAllAsync();
@@ -30,7 +29,8 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== GET BY ID =====================
-        [HttpGet("{id}")]
+        // URL: /api/Categories/Get-By-Id/5
+        [HttpGet("Get-By-Id/{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
             var category = await _categoryService.GetByIdAsync(id);
@@ -42,9 +42,10 @@ namespace ProductionHouse.API.Controllers
             ));
         }
 
-        // ===================== CREATE =====================
-        [HttpPost]
-        public async Task<IActionResult> Add(AddCategoryDto dto)
+        // ===================== CREATE (ADD) =====================
+        // URL: /api/Categories/Add
+        [HttpPost("Add")]
+        public async Task<IActionResult> Add([FromBody] AddCategoryDto dto)
         {
             await _categoryService.AddAsync(dto);
 
@@ -55,8 +56,9 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== UPDATE =====================
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UpdateCategoryDto dto)
+        // URL: /api/Categories/Update/5
+        [HttpPut("Update/{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDto dto)
         {
             if (id != dto.Id)
             {
@@ -75,7 +77,8 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== DELETE =====================
-        [HttpDelete("{id}")]
+        // URL: /api/Categories/Delete/5
+        [HttpDelete("Delete/{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             await _categoryService.DeleteAsync(id);

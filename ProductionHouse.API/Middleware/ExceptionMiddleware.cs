@@ -44,6 +44,7 @@ public class ExceptionMiddleware
 
             default:
                 statusCode = HttpStatusCode.InternalServerError;
+                exception = exception.InnerException ?? exception;
                 break;
         }
 
@@ -52,7 +53,7 @@ public class ExceptionMiddleware
         var response = new ApiResponse<object>
         {
             Success = false,
-            Message = exception.Message,
+            Message = exception.InnerException?.Message ?? exception.Message,
             Errors = null,
             Data = null
         };

@@ -7,8 +7,19 @@ using System.Threading.Tasks;
 
 namespace ProductionHouse.Core.Interfaces
 {
-    public interface IImageService
+    using Microsoft.AspNetCore.Http;
+
+    namespace ProductionHouse.Core.Interfaces
     {
-        Task<string> UploadAsync(IFormFile file, string folderName);
+        public interface IImageService
+        {
+            Task<string> UploadAsync(IFormFile file, string folderName);
+
+            Task<List<string>> UploadManyAsync(
+                List<IFormFile> files,
+                string folderName);
+
+            void DeleteImage(string imagePath);
+        }
     }
 }

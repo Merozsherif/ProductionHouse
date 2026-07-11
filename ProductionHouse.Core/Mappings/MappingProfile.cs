@@ -12,7 +12,21 @@ namespace ProductionHouse.Core.Mappings
             // ===========================
             // Project
             // ===========================
-            CreateMap<Project, ProjectDto>();
+
+
+            CreateMap<ProjectImage, ProjectImageDto>();
+
+            CreateMap<Project, ProjectDto>()
+
+                .ForMember(
+                    d => d.GalleryImages,
+                    o => o.MapFrom(s => s.Images))
+
+                .ForMember(
+                    d => d.CategoryName,
+                    o => o.MapFrom(s =>
+                        s.Category.Translations.FirstOrDefault()!.Name));
+
             CreateMap<AddProjectDto, Project>();
             CreateMap<UpdateProjectDto, Project>();
 
@@ -28,7 +42,7 @@ namespace ProductionHouse.Core.Mappings
             CreateMap<Category, CategoryDto>();
             CreateMap<AddCategoryDto, Category>();
             CreateMap<UpdateCategoryDto, Category>();
-
+      
             // ===========================
             // Category Translation
             // ===========================

@@ -10,5 +10,7 @@ namespace ProductionHouse.Core.Interfaces
     public interface IProjectRepository : IGenericRepository<Project>
     {
         Task<List<Project>> GetProjectsWithCategoryAsync();
+
+        Task AddGalleryImagesAsync(List<ProjectImage> images);
     }
 }

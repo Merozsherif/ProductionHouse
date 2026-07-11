@@ -7,7 +7,8 @@ using ProductionHouse.Infrastructure.Data;
 using ProductionHouse.Infrastructure.Repositories;
 using ProductionHouse.Infrastructure.Service;
 using ProductionHouse.Infrastructure.Services;
-using ProductionHouse.Infrastructure.UnitOfWork;
+using ProductionHouse.Infrastructure.Data;
+using ProductionHouse.Core.Interfaces.ProductionHouse.Core.Interfaces;
 namespace ProductionHouse.Infrastructure
 {
     public static class InfrastructureRegistration
@@ -28,8 +29,8 @@ namespace ProductionHouse.Infrastructure
             services.AddScoped<IProjectRepository, ProjectRepository>();
 
             // Unit Of Work
-            services.AddScoped<IUnitOfWork,UnitOfWork>();
-
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+     
             // Services
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<ICategoryService, CategoryService>();

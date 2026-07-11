@@ -22,24 +22,7 @@ namespace ProductionHouse.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ProductionHouse.Core.Entities.Category", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Image")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("ProductionHouse.Core.Entities.CategoryTranslation", b =>
+            modelBuilder.Entity("CategoryTranslation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -50,11 +33,22 @@ namespace ProductionHouse.Infrastructure.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<string>("LanguageCode")
+                    b.Property<int>("LanguageCode")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MetaDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MetaTitle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -63,6 +57,25 @@ namespace ProductionHouse.Infrastructure.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("CategoryTranslations");
+                });
+
+            modelBuilder.Entity("ProductionHouse.Core.Entities.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("ProductionHouse.Core.Entities.Project", b =>
@@ -86,6 +99,15 @@ namespace ProductionHouse.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -116,7 +138,7 @@ namespace ProductionHouse.Infrastructure.Migrations
                     b.ToTable("ProjectImages");
                 });
 
-            modelBuilder.Entity("ProductionHouse.Core.Entities.ProjectTranslation", b =>
+            modelBuilder.Entity("ProjectTranslation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -124,16 +146,43 @@ namespace ProductionHouse.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AltText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LanguageCode")
+                    b.Property<int>("LanguageCode")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MetaDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MetaKeywords")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MetaTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OgDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OgTitle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -146,7 +195,7 @@ namespace ProductionHouse.Infrastructure.Migrations
                     b.ToTable("ProjectTranslations");
                 });
 
-            modelBuilder.Entity("ProductionHouse.Core.Entities.CategoryTranslation", b =>
+            modelBuilder.Entity("CategoryTranslation", b =>
                 {
                     b.HasOne("ProductionHouse.Core.Entities.Category", "Category")
                         .WithMany("Translations")
@@ -179,7 +228,7 @@ namespace ProductionHouse.Infrastructure.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("ProductionHouse.Core.Entities.ProjectTranslation", b =>
+            modelBuilder.Entity("ProjectTranslation", b =>
                 {
                     b.HasOne("ProductionHouse.Core.Entities.Project", "Project")
                         .WithMany("Translations")

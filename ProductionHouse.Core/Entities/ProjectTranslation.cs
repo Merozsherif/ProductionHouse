@@ -1,23 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ProductionHouse.Core.Entities;
+using ProductionHouse.Core.Enums;
 
-namespace ProductionHouse.Core.Entities
+public class ProjectTranslation
 {
-    public class ProjectTranslation
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public int ProjectId { get; set; }
+    public int ProjectId { get; set; }
 
-        public string LanguageCode { get; set; } = string.Empty;
+    public LanguageCode LanguageCode { get; set; }
 
-        public string Title { get; set; } = string.Empty;
+    // Content
+    public string Title { get; set; } = string.Empty;
 
-        public string Description { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 
-        public Project Project { get; set; } = null!;
-    }
+    // SEO
+    public string Slug { get; set; } = string.Empty;
+
+    public string MetaTitle { get; set; } = string.Empty;
+
+    public string MetaDescription { get; set; } = string.Empty;
+
+    public string MetaKeywords { get; set; } = string.Empty;
+
+    // Social Sharing
+    public string OgTitle { get; set; } = string.Empty;
+
+    public string OgDescription { get; set; } = string.Empty;
+
+    public string AltText { get; set; } = string.Empty;
+
+    public Project Project { get; set; } = null!;
 }

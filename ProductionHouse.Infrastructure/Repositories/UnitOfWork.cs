@@ -3,7 +3,7 @@ using ProductionHouse.Core.Interfaces;
 using ProductionHouse.Infrastructure.Data;
 using ProductionHouse.Infrastructure.Repositories;
 
-namespace ProductionHouse.Infrastructure.UnitOfWork;
+namespace ProductionHouse.Infrastructure.Data;
 
 public class UnitOfWork : IUnitOfWork
 {
@@ -23,7 +23,8 @@ public class UnitOfWork : IUnitOfWork
     {
         _context = context;
 
-        Projects = new ProjectRepository(context);
+        Projects =
+      new ProjectRepository(context);
 
         ProjectImages =
             new GenericRepository<ProjectImage>(context);
@@ -32,7 +33,7 @@ public class UnitOfWork : IUnitOfWork
             new GenericRepository<ProjectTranslation>(context);
 
         Categories =
-            new GenericRepository<Category>(context);
+      new CategoryRepository(context);
 
         CategoryTranslations =
             new GenericRepository<CategoryTranslation>(context);
