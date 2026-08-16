@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using CloudinaryDotNet;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -142,7 +143,13 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowCredentials());
 });
+var cloudinaryUrl = Environment.GetEnvironmentVariable("CLOUDINARY_URL")
+    ?? builder.Configuration["CloudinarySettings:CloudinaryUrl"];
 
+var cloudinary = new Cloudinary(cloudinaryUrl);
+cloudinary.Api.Secure = true;
+
+builder.Services.AddSingleton(cloudinary);
 // ==========================================
 // 2. بناء التطبيق (Build)
 // ==========================================

@@ -1,49 +1,23 @@
-﻿using ImageMagick;
-using Microsoft.AspNetCore.Hosting;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using ImageMagick;
 using Microsoft.AspNetCore.Http;
 using ProductionHouse.Core.Interfaces;
-
 
 namespace ProductionHouse.Infrastructure.Services;
 
 public class ImageService : IImageService
 {
-    private readonly IWebHostEnvironment _environment;
+    private readonly Cloudinary _cloudinary;
 
-    public ImageService(IWebHostEnvironment environment)
+    public ImageService(Cloudinary cloudinary)
     {
-        _environment = environment;
+        _cloudinary = cloudinary;
     }
 
     // =====================================================
-    // UPLOAD IMAGE -> WEBP
+    // UPLOAD IMAGE -> WEBP -> CLOUDINARY
     // =====================================================
-    // في ImageService.cs
-    public void MoveImage(string oldRelativePath, string newRelativePath)
-    {
-        if (string.IsNullOrWhiteSpace(oldRelativePath))
-            return;
-
-        var oldFullPath = Path.Combine(
-            _environment.WebRootPath,
-            oldRelativePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
-
-        var newFullPath = Path.Combine(
-            _environment.WebRootPath,
-            newRelativePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
-
-        if (!File.Exists(oldFullPath))
-            return; // الملف مش موجود أصلاً، تجاهله
-
-        var newDir = Path.GetDirectoryName(newFullPath);
-        if (!string.IsNullOrEmpty(newDir))
-            Directory.CreateDirectory(newDir);
-
-        if (oldFullPath == newFullPath)
-            return; // نفس المكان أصلاً، متعملش حاجة
-
-        File.Move(oldFullPath, newFullPath, overwrite: true);
-    }
     public async Task<string> UploadAsync(
         IFormFile file,
         string folderName,
@@ -58,67 +32,51 @@ public class ImageService : IImageService
         if (file.Length > 15 * 1024 * 1024)
             throw new Exception("Maximum image size is 15 MB.");
 
-        var extension = Path.GetExtension(file.FileName)
-            .ToLowerInvariant();
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
         var allowedExtensions = new[]
         {
-            ".jpg",
-            ".jpeg",
-            ".png",
-            ".webp",
-            ".heic",
-            ".heif"
+            ".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"
         };
 
         if (!allowedExtensions.Contains(extension))
             throw new Exception("Invalid image type.");
 
-        // =================================================
-        // CREATE FOLDER
-        // =================================================
-
-        var uploadsFolder = Path.Combine(
-            _environment.WebRootPath,
-            "uploads",
-            folderName
-        );
-
-        Directory.CreateDirectory(uploadsFolder);
-
-        // =================================================
-        // ALWAYS SAVE AS WEBP
-        // =================================================
-
-        var finalFileName =
-            $"{fileName}-{Guid.NewGuid():N}.webp";
-
-        var filePath = Path.Combine(
-            uploadsFolder,
-            finalFileName
-        );
-
+        // Convert to WebP in-memory first (نفس منطقك القديم بالظبط)
         await using var inputStream = file.OpenReadStream();
-
         using var image = new MagickImage(inputStream);
 
-        // Fix EXIF orientation
         image.AutoOrient();
-
-        // Optional: limit huge images
         image.Quality = 82;
-
         image.Format = MagickFormat.WebP;
 
-        await image.WriteAsync(filePath);
+        using var outputStream = new MemoryStream();
+        await image.WriteAsync(outputStream, MagickFormat.WebP);
+        outputStream.Position = 0;
 
-        return $"uploads/{folderName}/{finalFileName}";
+        var publicId = $"{folderName}/{fileName}-{Guid.NewGuid():N}";
+
+        var uploadParams = new ImageUploadParams
+        {
+            File = new FileDescription($"{publicId}.webp", outputStream),
+            PublicId = publicId,
+            Folder = null, // الـ folder متضمن في publicId فوق
+            Overwrite = false,
+            Format = "webp"
+        };
+
+        var result = await _cloudinary.UploadAsync(uploadParams);
+
+        if (result.Error != null)
+            throw new Exception($"Upload failed: {result.Error.Message}");
+
+        // نرجع الرابط الكامل بدل مسار نسبي
+        return result.SecureUrl.ToString();
     }
 
     // =====================================================
     // UPLOAD MANY
     // =====================================================
-
     public async Task<List<string>> UploadManyAsync(
         List<IFormFile> files,
         string folderName)
@@ -132,14 +90,8 @@ public class ImageService : IImageService
 
         foreach (var file in files)
         {
-            var path = await UploadAsync(
-                file,
-                folderName,
-                $"image-{index:D3}"
-            );
-
-            result.Add(path);
-
+            var url = await UploadAsync(file, folderName, $"image-{index:D3}");
+            result.Add(url);
             index++;
         }
 
@@ -147,55 +99,74 @@ public class ImageService : IImageService
     }
 
     // =====================================================
-    // DELETE ONE IMAGE
+    // DELETE ONE IMAGE (بالرابط الكامل)
     // =====================================================
-
-    public void DeleteImage(string? imagePath)
+    public void DeleteImage(string? imageUrl)
     {
-        if (string.IsNullOrWhiteSpace(imagePath))
+        if (string.IsNullOrWhiteSpace(imageUrl))
             return;
 
-        var cleanPath = imagePath
-            .TrimStart('/')
-            .Replace("/", Path.DirectorySeparatorChar.ToString());
+        var publicId = ExtractPublicId(imageUrl);
 
-        var fullPath = Path.Combine(
-            _environment.WebRootPath,
-            cleanPath
-        );
+        if (string.IsNullOrEmpty(publicId))
+            return;
 
-        if (File.Exists(fullPath))
-        {
-            File.Delete(fullPath);
-        }
+        var deleteParams = new DeletionParams(publicId);
+        _cloudinary.Destroy(deleteParams);
     }
 
     // =====================================================
     // DELETE WHOLE PROJECT FOLDER
     // =====================================================
-
     public void DeleteFolder(string folderName)
     {
         if (string.IsNullOrWhiteSpace(folderName))
             return;
 
-        var folderPath = Path.Combine(
-            _environment.WebRootPath,
-            "uploads",
-            folderName
-        );
+        _cloudinary.DeleteResourcesByPrefix(folderName);
+        _cloudinary.DeleteFolder(folderName);
+    }
 
-        if (Directory.Exists(folderPath))
-        {
-            Directory.Delete(
-                folderPath,
-                recursive: true
-            );
-        }
+    // =====================================================
+    // MOVE / RENAME IMAGE
+    // =====================================================
+    public void MoveImage(string oldImageUrl, string newRelativePath)
+    {
+        if (string.IsNullOrWhiteSpace(oldImageUrl))
+            return;
+
+        var oldPublicId = ExtractPublicId(oldImageUrl);
+        var newPublicId = newRelativePath.Replace(".webp", "");
+
+        if (string.IsNullOrEmpty(oldPublicId))
+            return;
+
+        _cloudinary.Rename(oldPublicId, newPublicId, overwrite: true);
     }
 
     public Task<string> UploadAsync(string coverImage, string folderName)
     {
         throw new NotImplementedException();
+    }
+
+    // =====================================================
+    // Helper: استخرج الـ public_id من رابط Cloudinary كامل
+    // =====================================================
+    private string ExtractPublicId(string url)
+    {
+        // مثال: https://res.cloudinary.com/rjycqoql/image/upload/v123456/projects/image-001-abc.webp
+        var uploadIndex = url.IndexOf("/upload/");
+        if (uploadIndex == -1) return string.Empty;
+
+        var afterUpload = url.Substring(uploadIndex + "/upload/".Length);
+
+        // شيل الـ version لو موجودة (v123456/)
+        var parts = afterUpload.Split('/');
+        var startIndex = parts[0].StartsWith("v") && parts[0].Length > 1 && parts[0].Substring(1).All(char.IsDigit)
+            ? 1
+            : 0;
+
+        var publicIdWithExtension = string.Join("/", parts.Skip(startIndex));
+        return Path.ChangeExtension(publicIdWithExtension, null);
     }
 }
