@@ -59,6 +59,38 @@ namespace ProductionHouse.Infrastructure.Migrations
                     b.ToTable("CategoryTranslations");
                 });
 
+            modelBuilder.Entity("ProductionHouse.Core.Entities.Admin", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Admins");
+                });
+
             modelBuilder.Entity("ProductionHouse.Core.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -102,6 +134,9 @@ namespace ProductionHouse.Infrastructure.Migrations
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
+
+                    b.Property<string>("ImageFolder")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsFeatured")
                         .HasColumnType("bit");

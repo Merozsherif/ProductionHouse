@@ -1,4 +1,5 @@
-﻿using ProductionHouse.Core.Enums;
+﻿using Microsoft.AspNetCore.Http;
+using ProductionHouse.Core.Enums;
 using System.Collections.Generic;
 
 namespace ProductionHouse.Core.DTOs
@@ -25,12 +26,10 @@ namespace ProductionHouse.Core.DTOs
     public class AddProjectDto
     {
         public int CategoryId { get; set; }
-
         public string ClientName { get; set; } = string.Empty;
 
-        public string CoverImage { get; set; } = string.Empty;
-
-        public List<string> GalleryImages { get; set; } = new();
+        public IFormFile CoverImage { get; set; } = null!;
+        public List<IFormFile> GalleryImages { get; set; } = new();
 
         public List<ProjectTranslationDto> Translations { get; set; } = new();
     }
@@ -46,6 +45,7 @@ namespace ProductionHouse.Core.DTOs
         public string? CoverImage { get; set; }
 
         public List<string> GalleryImages { get; set; } = new();
+        public List<int> DeletedGalleryImages { get; set; } = new();
 
         public List<ProjectTranslationDto> Translations { get; set; } = new();
     }

@@ -18,6 +18,7 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<Category> Categories { get; }
 
     public IGenericRepository<CategoryTranslation> CategoryTranslations { get; }
+    public IAdminRepository Admins { get; }
 
     public UnitOfWork(AppDbContext context)
     {
@@ -37,6 +38,8 @@ public class UnitOfWork : IUnitOfWork
 
         CategoryTranslations =
             new GenericRepository<CategoryTranslation>(context);
+        Admins =
+            new AdminRepository(context);
     }
 
     public async Task<int> SaveChangesAsync()

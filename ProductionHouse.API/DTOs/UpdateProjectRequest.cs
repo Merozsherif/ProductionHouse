@@ -15,7 +15,7 @@ namespace ProductionHouse.API.DTOs
         public List<IFormFile>? GalleryImages { get; set; }
 
         public string Title { get; set; } = string.Empty;
-
+        public List<int> DeletedGalleryImages { get; set; } = new();
         public string Description { get; set; } = string.Empty;
     }
 }

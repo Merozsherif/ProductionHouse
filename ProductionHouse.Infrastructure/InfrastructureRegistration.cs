@@ -3,12 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProductionHouse.Core.Interfaces;
+using ProductionHouse.Core.Interfaces;
 using ProductionHouse.Infrastructure.Data;
 using ProductionHouse.Infrastructure.Repositories;
 using ProductionHouse.Infrastructure.Service;
 using ProductionHouse.Infrastructure.Services;
-using ProductionHouse.Infrastructure.Data;
-using ProductionHouse.Core.Interfaces.ProductionHouse.Core.Interfaces;
+
 namespace ProductionHouse.Infrastructure
 {
     public static class InfrastructureRegistration
@@ -30,14 +30,14 @@ namespace ProductionHouse.Infrastructure
 
             // Unit Of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-     
+
             // Services
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IImageService, ImageService>();
 
             // AutoMapper
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
 
             return services;
         }

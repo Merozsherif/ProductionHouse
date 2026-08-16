@@ -8,6 +8,7 @@ namespace ProductionHouse.Core.Entities
 {
     public class Project
     {
+        public string? ImageFolder { get; set; }
         public int Id { get; set; }
 
         public int CategoryId { get; set; }

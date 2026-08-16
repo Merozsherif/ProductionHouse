@@ -21,11 +21,9 @@ namespace ProductionHouse.Core.Mappings
                 .ForMember(
                     d => d.GalleryImages,
                     o => o.MapFrom(s => s.Images))
-
                 .ForMember(
-                    d => d.CategoryName,
-                    o => o.MapFrom(s =>
-                        s.Category.Translations.FirstOrDefault()!.Name));
+                d => d.CategoryName, 
+                o => o.MapFrom(s => s.Category.Translations.FirstOrDefault()!.Name));
 
             CreateMap<AddProjectDto, Project>();
             CreateMap<UpdateProjectDto, Project>();

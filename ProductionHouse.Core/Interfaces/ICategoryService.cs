@@ -11,6 +11,7 @@ namespace ProductionHouse.Core.Interfaces
     {
         Task<List<CategoryDto>> GetAllAsync();
         Task<CategoryDto?> GetByIdAsync(int id);
+        Task<List<CategoryDropdownDto>> GetDropdownAsync();
         Task AddAsync(AddCategoryDto dto);
         Task UpdateAsync(UpdateCategoryDto dto);
         Task DeleteAsync(int id);

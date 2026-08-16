@@ -15,7 +15,7 @@ namespace ProductionHouse.Infrastructure.Data
         public DbSet<ProjectImage> ProjectImages { get; set; }
         public DbSet<ProjectTranslation> ProjectTranslations { get; set; }
         public DbSet<CategoryTranslation> CategoryTranslations { get; set; }
-
+        public DbSet<Admin> Admins { get; set; }
         // 2) رسم العلاقات بالتفصيل باستخدام الـ Fluent API
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

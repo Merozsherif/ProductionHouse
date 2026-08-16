@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductionHouse.API.DTOs;
 using ProductionHouse.Core.Interfaces;
-using ProductionHouse.Core.Interfaces.ProductionHouse.Core.Interfaces;
 using ProductionHouse.Core.Responses;
 
 namespace ProductionHouse.API.Controllers

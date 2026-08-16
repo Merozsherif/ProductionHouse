@@ -1,25 +1,24 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ProductionHouse.Core.Interfaces
 {
-    using Microsoft.AspNetCore.Http;
-
-    namespace ProductionHouse.Core.Interfaces
+    public interface IImageService
     {
-        public interface IImageService
-        {
-            Task<string> UploadAsync(IFormFile file, string folderName);
+        Task<string> UploadAsync(
+            IFormFile file,
+            string folderName,
+            string fileName = "image");
 
-            Task<List<string>> UploadManyAsync(
-                List<IFormFile> files,
-                string folderName);
+        Task<List<string>> UploadManyAsync(
+            List<IFormFile> files,
+            string folderName);
 
-            void DeleteImage(string imagePath);
-        }
+        void DeleteImage(string? imagePath);
+        // في IImageService.cs
+        void MoveImage(string oldRelativePath, string newRelativePath);
+        void DeleteFolder(string folderName);
+        Task<string> UploadAsync(string coverImage, string folderName);
     }
 }

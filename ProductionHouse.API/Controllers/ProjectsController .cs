@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProductionHouse.API.DTOs;
 using ProductionHouse.Core.DTOs;
 using ProductionHouse.Core.Enums;
 using ProductionHouse.Core.Interfaces;
-using ProductionHouse.Core.Interfaces.ProductionHouse.Core.Interfaces;
 using ProductionHouse.Core.Responses;
 
 namespace ProductionHouse.API.Controllers
@@ -22,12 +22,17 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== GET ALL =====================
+        [AllowAnonymous]
         [HttpGet("Get-All")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] ProjectQueryDto query)
         {
-            var projects = await _projectService.GetAllAsync();
+            var projects =
+                await _projectService
+                .GetAllAsync(query);
 
-            return Ok(new ApiResponse<List<ProjectDto>>(
+            return Ok(new ApiResponse<PagedResult<ProjectDto>>
+            (
                 true,
                 "Projects retrieved successfully.",
                 projects
@@ -35,6 +40,7 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== GET BY ID =====================
+        [AllowAnonymous]
         [HttpGet("Get-By-Id/{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -48,39 +54,42 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== ADD =====================
+        [Authorize(Roles = "Admin")]
         [HttpPost("Add")]
         public async Task<IActionResult> Add([FromForm] AddProjectRequest request)
         {
-            // Upload Cover
-            var coverImage = await _imageService.UploadAsync(
-                request.CoverImage,
-                "projects");
+            var dto = MapToDto(request);
 
-            // Upload Gallery
-            var galleryImages = await _imageService.UploadManyAsync(
-                request.GalleryImages,
-                "projects");
-
-            // Convert Request -> DTO
-            var dto = MapToDto(
-                request,
-                coverImage,
-                galleryImages);
-
-            // Save
             await _projectService.AddAsync(dto);
 
-            return Ok(new ApiResponse<string>(
-                true,
-                "Project created successfully."
-            ));
+            return Ok(new ApiResponse<string>(true, "Project created successfully."));
         }
 
+        private AddProjectDto MapToDto(AddProjectRequest request)
+        {
+            return new AddProjectDto
+            {
+                CategoryId = request.CategoryId,
+                ClientName = request.ClientName,
+                CoverImage = request.CoverImage,
+                GalleryImages = request.GalleryImages,
+                Translations = new()
+        {
+            new ProjectTranslationDto
+            {
+                LanguageCode = LanguageCode.EN,
+                Title = request.Title,
+                Description = request.Description
+            }
+        }
+            };
+        }
         // ===================== UPDATE =====================
+        [Authorize(Roles = "Admin")]
         [HttpPut("Update/{id}")]
         public async Task<IActionResult> Update(
-      int id,
-      [FromForm] UpdateProjectRequest request)
+            int id,
+            [FromForm] UpdateProjectRequest request)
         {
             string? cover = null;
 
@@ -108,16 +117,16 @@ namespace ProductionHouse.API.Controllers
                 ClientName = request.ClientName,
                 CoverImage = cover,
                 GalleryImages = gallery,
-
+                DeletedGalleryImages = request.DeletedGalleryImages,
                 Translations = new()
-        {
-            new ProjectTranslationDto
-            {
-                LanguageCode=LanguageCode.EN,
-                Title=request.Title,
-                Description=request.Description
-            }
-        }
+                {
+                    new ProjectTranslationDto
+                    {
+                        LanguageCode = LanguageCode.EN,
+                        Title = request.Title,
+                        Description = request.Description
+                    }
+                }
             };
 
             await _projectService.UpdateAsync(dto);
@@ -128,6 +137,7 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== DELETE =====================
+        [Authorize(Roles = "Admin")]
         [HttpDelete("Delete/{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -140,6 +150,7 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== Upload Gallery =====================
+        [Authorize(Roles = "Admin")]
         [HttpPost("Upload-Gallery/{id:int}")]
         public async Task<IActionResult> UploadGallery(
             int id,
@@ -160,10 +171,9 @@ namespace ProductionHouse.API.Controllers
             ));
         }
 
-
-
         // ===================== CHANGE COVER =====================
         // URL: api/Projects/Change-Cover/5
+        [Authorize(Roles = "Admin")]
         [HttpPut("Change-Cover/{id:int}")]
         public async Task<IActionResult> ChangeCover(
             int id,
@@ -182,10 +192,10 @@ namespace ProductionHouse.API.Controllers
                 "Cover updated successfully."
             ));
         }
+
         // ===================== DELETE GALLERY IMAGE =====================
         // URL: api/Projects/Delete-Gallery-Image/15
-
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("Delete-Gallery-Image/{imageId:int}")]
         public async Task<IActionResult> DeleteGalleryImage(int imageId)
         {
@@ -196,35 +206,40 @@ namespace ProductionHouse.API.Controllers
                 "Image deleted successfully."
             ));
         }
+        // ===================== ONE-TIME MIGRATION =====================
+        // بعد التشغيل مرة واحدة، امسح الـ endpoint ده
+        [Authorize(Roles = "Admin")]
+        [HttpPost("Migrate-Old-Images")]
+        public async Task<IActionResult> MigrateOldImages()
+        {
+            var result = await _projectService.MigrateOldImagesAsync();
+
+            return Ok(new ApiResponse<string>(
+                true,
+                $"Migration done. Moved {result} files."
+            ));
+        }
         // =====================================================
         // Private Methods
         // =====================================================
-
-        private AddProjectDto MapToDto(
-            AddProjectRequest request,
-            string coverImage,
-            List<string> galleryImages)
-        {
-            return new AddProjectDto
-            {
-                CategoryId = request.CategoryId,
-
-                ClientName = request.ClientName,
-
-                CoverImage = coverImage,
-
-                GalleryImages = galleryImages,
-
-                Translations = new List<ProjectTranslationDto>
-                {
-                    new ProjectTranslationDto
-                    {
-                     LanguageCode = LanguageCode.EN,
-                        Title = request.Title,
-                        Description = request.Description
-                    }
-                }
-            };
-        }
+        //private AddProjectDto MapToDto(AddProjectRequest request)
+        //{
+        //    return new AddProjectDto
+        //    {
+        //        CategoryId = request.CategoryId,
+        //        ClientName = request.ClientName,
+        //        CoverImage = request.CoverImage,
+        //        GalleryImages = request.GalleryImages,
+        //        Translations = new()
+        //{
+        //    new ProjectTranslationDto
+        //    {
+        //        LanguageCode = LanguageCode.EN,
+        //        Title = request.Title,
+        //        Description = request.Description
+        //    }
+        //}
+        //    };
+        //}
     }
 }

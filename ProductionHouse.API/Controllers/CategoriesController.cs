@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProductionHouse.Core.DTOs;
 using ProductionHouse.Core.Interfaces;
 using ProductionHouse.Core.Responses;
@@ -16,6 +17,7 @@ namespace ProductionHouse.API.Controllers
 
         // ===================== GET ALL =====================
         // URL: /api/Categories/Get-All
+        [AllowAnonymous]
         [HttpGet("Get-All")]
         public async Task<IActionResult> GetAll()
         {
@@ -29,6 +31,19 @@ namespace ProductionHouse.API.Controllers
         }
 
         // ===================== GET BY ID =====================
+
+
+        [AllowAnonymous]
+        [HttpGet("Dropdown")]
+        public async Task<IActionResult> Dropdown()
+        {
+            var categories = await _categoryService.GetDropdownAsync();
+            return Ok(new ApiResponse<List<CategoryDropdownDto>>(
+                true,
+                "Dropdown retrieved successfully.",
+                categories
+            ));
+        }
         // URL: /api/Categories/Get-By-Id/5
         [HttpGet("Get-By-Id/{id:int}")]
         public async Task<IActionResult> GetById(int id)

@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using ImageMagick;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using ProductionHouse.Core.Interfaces;
-using ProductionHouse.Core.Interfaces.ProductionHouse.Core.Interfaces;
+
 
 namespace ProductionHouse.Infrastructure.Services;
 
@@ -14,7 +15,39 @@ public class ImageService : IImageService
         _environment = environment;
     }
 
-    public async Task<string> UploadAsync(IFormFile file, string folderName)
+    // =====================================================
+    // UPLOAD IMAGE -> WEBP
+    // =====================================================
+    // في ImageService.cs
+    public void MoveImage(string oldRelativePath, string newRelativePath)
+    {
+        if (string.IsNullOrWhiteSpace(oldRelativePath))
+            return;
+
+        var oldFullPath = Path.Combine(
+            _environment.WebRootPath,
+            oldRelativePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+        var newFullPath = Path.Combine(
+            _environment.WebRootPath,
+            newRelativePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+        if (!File.Exists(oldFullPath))
+            return; // الملف مش موجود أصلاً، تجاهله
+
+        var newDir = Path.GetDirectoryName(newFullPath);
+        if (!string.IsNullOrEmpty(newDir))
+            Directory.CreateDirectory(newDir);
+
+        if (oldFullPath == newFullPath)
+            return; // نفس المكان أصلاً، متعملش حاجة
+
+        File.Move(oldFullPath, newFullPath, overwrite: true);
+    }
+    public async Task<string> UploadAsync(
+        IFormFile file,
+        string folderName,
+        string fileName = "image")
     {
         if (file == null)
             throw new Exception("Image is required.");
@@ -22,52 +55,114 @@ public class ImageService : IImageService
         if (file.Length == 0)
             throw new Exception("Image is empty.");
 
-        var extension = Path.GetExtension(file.FileName).ToLower();
+        if (file.Length > 15 * 1024 * 1024)
+            throw new Exception("Maximum image size is 15 MB.");
 
-        string[] allowed =
+        var extension = Path.GetExtension(file.FileName)
+            .ToLowerInvariant();
+
+        var allowedExtensions = new[]
         {
             ".jpg",
             ".jpeg",
             ".png",
-            ".webp"
+            ".webp",
+            ".heic",
+            ".heif"
         };
 
-        if (!allowed.Contains(extension))
+        if (!allowedExtensions.Contains(extension))
             throw new Exception("Invalid image type.");
 
-        if (file.Length > 5 * 1024 * 1024)
-            throw new Exception("Maximum image size is 5 MB.");
+        // =================================================
+        // CREATE FOLDER
+        // =================================================
 
         var uploadsFolder = Path.Combine(
             _environment.WebRootPath,
             "uploads",
-            folderName);
+            folderName
+        );
 
-        if (!Directory.Exists(uploadsFolder))
-        {
-            Directory.CreateDirectory(uploadsFolder);
-        }
+        Directory.CreateDirectory(uploadsFolder);
 
-        var fileName =
-            Guid.NewGuid().ToString() + extension;
+        // =================================================
+        // ALWAYS SAVE AS WEBP
+        // =================================================
 
-        var filePath =
-            Path.Combine(uploadsFolder, fileName);
+        var finalFileName =
+            $"{fileName}-{Guid.NewGuid():N}.webp";
 
-        using var stream =
-            new FileStream(filePath, FileMode.Create);
+        var filePath = Path.Combine(
+            uploadsFolder,
+            finalFileName
+        );
 
-        await file.CopyToAsync(stream);
+        await using var inputStream = file.OpenReadStream();
 
-        return $"uploads/{folderName}/{fileName}";
+        using var image = new MagickImage(inputStream);
+
+        // Fix EXIF orientation
+        image.AutoOrient();
+
+        // Optional: limit huge images
+        image.Quality = 82;
+
+        image.Format = MagickFormat.WebP;
+
+        await image.WriteAsync(filePath);
+
+        return $"uploads/{folderName}/{finalFileName}";
     }
 
-    public void DeleteImage(string imagePath)
+    // =====================================================
+    // UPLOAD MANY
+    // =====================================================
+
+    public async Task<List<string>> UploadManyAsync(
+        List<IFormFile> files,
+        string folderName)
     {
+        var result = new List<string>();
+
+        if (files == null || !files.Any())
+            return result;
+
+        int index = 1;
+
+        foreach (var file in files)
+        {
+            var path = await UploadAsync(
+                file,
+                folderName,
+                $"image-{index:D3}"
+            );
+
+            result.Add(path);
+
+            index++;
+        }
+
+        return result;
+    }
+
+    // =====================================================
+    // DELETE ONE IMAGE
+    // =====================================================
+
+    public void DeleteImage(string? imagePath)
+    {
+        if (string.IsNullOrWhiteSpace(imagePath))
+            return;
+
+        var cleanPath = imagePath
+            .TrimStart('/')
+            .Replace("/", Path.DirectorySeparatorChar.ToString());
+
         var fullPath = Path.Combine(
-            Directory.GetCurrentDirectory(),
-            "wwwroot",
-            imagePath);
+            _environment.WebRootPath,
+            cleanPath
+        );
 
         if (File.Exists(fullPath))
         {
@@ -75,20 +170,32 @@ public class ImageService : IImageService
         }
     }
 
-    public async Task<List<string>> UploadManyAsync(
-    List<IFormFile> files,
-    string folderName)
+    // =====================================================
+    // DELETE WHOLE PROJECT FOLDER
+    // =====================================================
+
+    public void DeleteFolder(string folderName)
     {
-        var result = new List<string>();
+        if (string.IsNullOrWhiteSpace(folderName))
+            return;
 
-        foreach (var file in files)
+        var folderPath = Path.Combine(
+            _environment.WebRootPath,
+            "uploads",
+            folderName
+        );
+
+        if (Directory.Exists(folderPath))
         {
-            var path = await UploadAsync(file, folderName);
-
-            result.Add(path);
+            Directory.Delete(
+                folderPath,
+                recursive: true
+            );
         }
-
-        return result;
     }
 
+    public Task<string> UploadAsync(string coverImage, string folderName)
+    {
+        throw new NotImplementedException();
+    }
 }

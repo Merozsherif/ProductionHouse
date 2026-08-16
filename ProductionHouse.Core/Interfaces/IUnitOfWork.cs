@@ -18,7 +18,7 @@ namespace ProductionHouse.Core.Interfaces
         IGenericRepository<Category> Categories { get; }
 
         IGenericRepository<CategoryTranslation> CategoryTranslations { get; }
-
+        IAdminRepository Admins { get; }
         Task<int> SaveChangesAsync();
     }
 }

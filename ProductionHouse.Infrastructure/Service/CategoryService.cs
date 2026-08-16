@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ProductionHouse.Core.DTOs;
 using ProductionHouse.Core.Entities;
+using ProductionHouse.Core.Enums;
 using ProductionHouse.Core.Exceptions;
 using ProductionHouse.Core.Interfaces;
 
@@ -58,6 +59,19 @@ public class CategoryService : ICategoryService
         return _mapper.Map<CategoryDto>(category);
     }
 
+
+    public async Task<List<CategoryDropdownDto>> GetDropdownAsync()
+    {
+        var categories = await _unitOfWork.Categories.GetAllAsync();
+
+        return categories.Select(c => new CategoryDropdownDto
+        {
+            Id = c.Id,
+            Name = c.Translations.FirstOrDefault(t => t.LanguageCode == LanguageCode.EN)?.Name
+                   ?? c.Translations.FirstOrDefault()?.Name
+                   ?? string.Empty
+        }).ToList();
+    }
     // ===================== UPDATE =====================
     public async Task UpdateAsync(UpdateCategoryDto dto)
     {
