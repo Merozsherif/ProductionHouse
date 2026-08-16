@@ -26,8 +26,22 @@ var builder = WebApplication.CreateBuilder(args);
 // ==========================================
 
 // إعداد قاعدة البيانات (DbContext)
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Railway بيديك الرابط بصيغة postgresql://user:pass@host:port/db
+// لازم نحوله لصيغة .NET Npgsql
+if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres"))
+{
+    var uri = new Uri(connectionString);
+    var userInfo = uri.UserInfo.Split(':');
+
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};" +
+                        $"Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 // تسجيل الـ Repositories والـ Services
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
