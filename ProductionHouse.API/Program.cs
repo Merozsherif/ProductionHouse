@@ -169,10 +169,15 @@ builder.Services.AddSingleton(cloudinary);
 // ==========================================
 var app = builder.Build();
 
+
 // تنفيذ الـ Database Seeding
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    // ينشئ الجداول لو مش موجودة (تطبيق كل الـ Migrations تلقائي)
+    await db.Database.MigrateAsync();
+
     await DbSeeder.SeedAdminAsync(db);
 }
 
