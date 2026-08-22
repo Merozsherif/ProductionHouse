@@ -78,8 +78,14 @@ namespace ProductionHouse.API.Controllers
             new ProjectTranslationDto
             {
                 LanguageCode = LanguageCode.EN,
-                Title = request.Title,
-                Description = request.Description
+                Title = request.TitleEn,
+                Description = request.DescriptionEn
+            },
+            new ProjectTranslationDto
+            {
+                LanguageCode = LanguageCode.AR,
+                Title = request.TitleAr,
+                Description = request.DescriptionAr
             }
         }
             };
@@ -119,14 +125,20 @@ namespace ProductionHouse.API.Controllers
                 GalleryImages = gallery,
                 DeletedGalleryImages = request.DeletedGalleryImages,
                 Translations = new()
-                {
-                    new ProjectTranslationDto
-                    {
-                        LanguageCode = LanguageCode.EN,
-                        Title = request.Title,
-                        Description = request.Description
-                    }
-                }
+    {
+        new ProjectTranslationDto
+        {
+            LanguageCode = LanguageCode.EN,
+            Title = request.TitleEn,
+            Description = request.DescriptionEn
+        },
+        new ProjectTranslationDto
+        {
+            LanguageCode = LanguageCode.AR,
+            Title = request.TitleAr,
+            Description = request.DescriptionAr
+        }
+    }
             };
 
             await _projectService.UpdateAsync(dto);

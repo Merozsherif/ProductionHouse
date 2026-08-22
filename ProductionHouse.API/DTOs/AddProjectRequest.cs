@@ -9,7 +9,10 @@ namespace ProductionHouse.API.DTOs
         public string ClientName { get; set; } = string.Empty;
         public IFormFile CoverImage { get; set; } = null!;
         public List<IFormFile> GalleryImages { get; set; } = new();
-        public string Title { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
+
+        public string TitleEn { get; set; } = string.Empty;
+        public string DescriptionEn { get; set; } = string.Empty;
+        public string TitleAr { get; set; } = string.Empty;
+        public string DescriptionAr { get; set; } = string.Empty;
     }
 }

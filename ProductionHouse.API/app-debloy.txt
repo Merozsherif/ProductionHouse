@@ -11,7 +11,9 @@
   "CloudinarySettings": {
     "CloudinaryUrl": "cloudinary://343336368161426:Lx0e7lxMLxTyS8blcMbVN3OaIKQ@rjycqoql"
   },
-
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=tramway.proxy.rlwy.net;Port=52249;Database=railway;Username=postgres;Password=jtfERhnrjcBfaGUkLkWooRdBtFmaHqer;SSL Mode=Require;Trust Server Certificate=true"
+  },
   "Jwt": {
     "Key": "ProductionHouseSuperSecretKey123456789",
     "Issuer": "ProductionHouseAPI",
